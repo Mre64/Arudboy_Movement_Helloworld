@@ -16,6 +16,7 @@ uint8_t curY = 30;
 uint8_t amoX;
 uint8_t amoY;
 
+bool shoot = 0;
 
 const uint8_t xBound = 120;
 const uint8_t yBound = 56;
@@ -23,19 +24,25 @@ const uint8_t zBound = 0;
 
 unsigned long aiInterval = 40;
 unsigned long aiPreMillis = 0;
-unsigned long mreInterval = 20;
+unsigned long mreInterval = 10;
 unsigned long mrePreMillis = 0;
-unsigned long ammoInterval = 20;
-unsigned long ammoPreMillis = 0;
+unsigned long amoInterval = 250;
+unsigned long amoPreMillis = 0;
+unsigned long laserInterval = 2;
+unsigned long laserPreMillis = 0;
+
 
 unsigned long mreCurMillis;
+unsigned long amoCurMillis;
+unsigned long laserCurMillis;
+
 
 void setup() {
     SPI.begin();
     display.start();
     display.setTextSize(1);
     display.clearDisplay();
-    delay(2000);
+   // delay(2000);
     //intro bitmap
     introFade();
     //character creation example
@@ -43,19 +50,27 @@ void setup() {
 }
 
 void loop() {
-    debug(curX,curY);
-    
-    amoX = curX +4;
-    amoY = curY +4;
-    
+   // debug(curX,curY);    
     display.drawBitmap(curY,curX,star,8,8,WHITE);
-    display.drawBitmap(30,aiY,star,8,8,WHITE);
-    display.drawPixel(amoY, amoX,WHITE);
+   // display.drawBitmap(30,aiY,star,8,8,WHITE);
+    
+    if(shoot){
+        laserCurMillis = millis();
+        if(laserCurMillis - laserPreMillis > laserInterval) {
+        laserPreMillis = laserCurMillis;
+            amoX--;
+        }
+        display.drawPixel(amoY,amoX,WHITE);
+      if(amoX < 1){
+        amoX = 0;
+        shoot = 0;     
+      }
+    }
     
     display.display();
     
-    unsigned long currentMillis = millis();
-    moveAi(&currentMillis,&aiPreMillis,&aiInterval, &aiY);
+    //unsigned long currentMillis = millis();
+    //moveAi(&currentMillis,&aiPreMillis,&aiInterval, &aiY);
     
     if (display.pressed(UP_BUTTON) && (curX > zBound)){
         mreCurMillis = millis();
@@ -84,12 +99,14 @@ void loop() {
             curY++;
         }
     }
-
+    
     if (display.pressed(A_BUTTON)){
-       unsigned long ammoCurMillis = millis();
-        if(ammoCurMillis - ammoPreMillis > ammoInterval) {
-            ammoPreMillis = ammoCurMillis;
-            amoY--;
+            amoCurMillis = millis();
+        if(amoCurMillis - amoPreMillis > amoInterval) {
+            amoX = curX +4;
+            amoY = curY +4;
+            amoPreMillis = amoCurMillis;
+            shoot = 1;
         }
     }
     display.clearDisplay(); 
@@ -143,3 +160,5 @@ void moveAi(unsigned long * currentMillis, unsigned long * aiPreMillis, unsigned
         aiY++;
     }
 }
+
+
