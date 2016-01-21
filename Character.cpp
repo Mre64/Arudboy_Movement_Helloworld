@@ -7,67 +7,73 @@ Character::Character(char cc, uint8_t s, bool d, uint8_t dX, uint8_t dY, uint8_t
   characterClass = cc;
   strength = s;
   destructable = d;
-  dimX = dX;
-  dimY = dY;
-  dimH = dH;
-  dimW = dW;
+  x = dX;
+  y = dY;
+  h = dH;
+  w = dW;
   interval = inter;
 }
-
-void Character::enableMovement(uint8_t *x, uint8_t *y, unsigned long *pre, unsigned long *cur, uint8_t inter, uint8_t zB, uint8_t xB, uint8_t yB,  Arduboy *d, const unsigned char a[]) {
-
-  d->drawBitmap(*y, *x, a, 8, 8, WHITE);
-  if (d->pressed(UP_BUTTON) && (*x > zB)) {
-    *cur = millis();
-    if (*cur - *pre > inter) {
-      *x = *x - 1;
-      *pre = *cur;
+Physics phy;
+void Character::enableMovement(Character *c, Arduboy *d, const unsigned char a[]) {
+ Point dim; 
+ Physics phy;
+ 
+  d->drawBitmap(c->y, c->x, a, 8, 8, WHITE);
+  dim.x = c->y;
+  dim.y = c->x;
+  if (d->pressed(UP_BUTTON) && (!phy.collide(dim, TOP_EDGE))) {
+    c->curMillis = millis();
+    if (c->curMillis - preMillis > c->interval) {
+      c->x = c->x - 1;
+      preMillis = c->curMillis;
     }
-  } else if (d->pressed(DOWN_BUTTON) && (*x < yB)) {
-    *cur = millis();
-
-    if (*cur - *pre > inter) {
-      *pre = *cur;
-      *x = *x + 1;
+  } else if (d->pressed(DOWN_BUTTON) && (!phy.collide(dim, BOTTOM_EDGE))) {
+    c->curMillis = millis();
+    if (c->curMillis - preMillis > c->interval) {
+      preMillis = c->curMillis;
+      c->x = c->x + 1;
     }
-  } else if (d->pressed(LEFT_BUTTON) && (*y > zB)) {
-    *cur = millis();
-    if (*cur - *pre > inter) {
-      *pre = *cur;
-      *y = *y - 1;
+  } else if (d->pressed(LEFT_BUTTON) && (!phy.collide(dim, LEFT_EDGE))) {
+    c->curMillis = millis();
+    if (c->curMillis - preMillis > c->interval) {
+      preMillis = c->curMillis;
+      c->y = c->y - 1;
     }
-  } else if (d->pressed(RIGHT_BUTTON) && (*y < xB)) {
-    *cur = millis();
-
-    if (*cur - *pre > inter) {
-      *pre = *cur;
-      *y = *y + 1;
+  } else if (d->pressed(RIGHT_BUTTON) && (!phy.collide(dim, RIGHT_EDGE))) {
+    c->curMillis = millis();
+    if (c->curMillis - preMillis > c->interval) {
+      preMillis = c->curMillis;
+      c->y = c->y + 1;
     }
   }
 }
 
-void Character::activateWeapons(uint8_t *x, uint8_t *y, unsigned long *pressPre, unsigned long *pressCur, uint8_t pressInter, unsigned long *ammoPre, unsigned long *ammoCur, uint8_t ammoInter, uint8_t zB, uint8_t xB, uint8_t yB, Arduboy *d, bool * shoot) {
+void Character::activateWeapons(Weapons *w, Arduboy *d) {
+  Point dim; 
 
-  if (*shoot) {
-    *ammoCur = millis();
-    if (*ammoCur - *ammoPre > ammoInter) {
-      *ammoPre = *ammoCur;
-      if (*x < 1) {
-        *x = 0;
-        shoot = 0;
+  dim.x = w->y;
+  dim.y = w->x;
+
+  if (w->shoot) {
+    w->ammoCurMillis = millis();
+    if (w->ammoCurMillis - w->ammoPreMillis > w->ammoInterval) {
+      w->ammoPreMillis = w->ammoCurMillis;
+      if (phy.collide(dim, TOP_EDGE)) {
+        w->x = 0;
+        w->shoot = 0;
       } else {
-        *x = *x - 1;
-        d->drawPixel(*y, *x, WHITE);
+        w->x = w->x - 1;
+        d->drawPixel(w->y, w->x, WHITE);
       }
     }
   }
   if (d->pressed(A_BUTTON)) {
-    *pressCur = millis();
-    if (*pressCur - *pressPre > pressInter) {
-      *pressPre = *pressCur;
-      *x = dimX + 4;
-      *y = dimY + 4;
-      *shoot = 1;
+    w->pressCurMillis = millis();
+    if (w->pressCurMillis - w->pressPreMillis > w->pressInterval) {
+      w->pressPreMillis = w->pressCurMillis;
+      w->x = x + 4;
+      w->y = y + 4;
+      w->shoot = 1;
     }
   }
 }

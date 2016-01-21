@@ -6,11 +6,6 @@
 #include "Weapons.h"
 #include <stdio.h>
 
-// bounds of screen for character
-const uint8_t xBound = 120;
-const uint8_t yBound = 56;
-const uint8_t zBound = 0;
-
 Arduboy display;
 Character belknar('a', 3, 1, 32, 64, 8, 8, 10);
 Weapons weapon;
@@ -30,11 +25,11 @@ void setup() {
 }
 
 void loop() {
-  debug(weapon.dimX, weapon.dimY);
+  debug(weapon.x, weapon.y);
   // enable directions to be implemented
-  belknar.enableMovement(&belknar.dimX, &belknar.dimY, &belknar.preMillis, &belknar.curMillis, belknar.interval, zBound, xBound, yBound, &display, star);
+  belknar.enableMovement(&belknar,&display, star);
   // enable weapon system (at least A BUTTON for now)
-  belknar.activateWeapons(&weapon.dimX, &weapon.dimY, &weapon.pressCurMillis, &weapon.pressPreMillis, weapon.pressInterval, &weapon.ammoPreMillis, &weapon.ammoCurMillis, weapon.ammoInterval, zBound, xBound, yBound, &display, &weapon.shoot);
+  belknar.activateWeapons(&weapon ,&display);
 
   display.display();
 

@@ -1,4 +1,6 @@
 #include "Arduboy.h"
+#include "physics.h"
+#include "Weapons.h"
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
@@ -6,15 +8,15 @@ class Character {
   public:
     //Character();
     Character(char cc, uint8_t s, bool d, uint8_t dX, uint8_t dY, uint8_t dH, uint8_t dW, uint8_t inter);
-    void enableMovement(uint8_t *x, uint8_t *y, unsigned long *pre, unsigned long *cur, uint8_t inter, uint8_t zB, uint8_t xB, uint8_t yB,  Arduboy *d, const unsigned char a[]);
-    void activateWeapons(uint8_t *x, uint8_t *y, unsigned long *pressPre, unsigned long *pressCur, uint8_t pressInter, unsigned long *ammoPre, unsigned long *ammoCur, uint8_t ammoInter, uint8_t zB, uint8_t xB, uint8_t yB, Arduboy *d, bool * shoot);
+    void enableMovement(Character *c, Arduboy *d, const unsigned char a[]);
+    void activateWeapons( Weapons *w, Arduboy *d);
     char characterClass;
     uint8_t strength;
     bool  destructable;
-    uint8_t dimX;
-    uint8_t dimY;
-    uint8_t dimH;
-    uint8_t dimW;
+    uint8_t x;
+    uint8_t y;
+    uint8_t h;
+    uint8_t w;
     unsigned long curMillis;
     unsigned long preMillis;
     uint8_t interval;
