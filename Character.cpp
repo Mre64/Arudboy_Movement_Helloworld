@@ -1,138 +1,143 @@
 #include "Character.h"
 #include <stdio.h>
+#include <math.h>
 
-//Character::Character(){
-//}
-Character::Character(char cc, uint8_t s, bool d, uint8_t inter, Rect r) {
-  characterClass = cc;
-  strength = s;
-  destructable = d;
+Character::Character(Rect r) {
+
   x = r.x;
   y = r.y;
   h = r.height;
   w = r.width;
-  interval = inter;
+  wep.x = r.x + 4;
+  wep.y = r.y + 4;
 }
-//Physics phy;
+
 
 void Character::enableMovement(Character *c, Arduboy *d, const unsigned char a[]) {
- Point dim; 
- Physics phy;
- 
-  d->drawBitmap(c->y, c->x, a, 8, 8, WHITE);
   dim.x = c->y;
   dim.y = c->x;
+
+  d->drawBitmap(c->y, c->x, a, c->w, c->h, WHITE);
+
   if (d->pressed(UP_BUTTON) && (!phy.collide(dim, TOP_EDGE))) {
-    c->curMillis = millis();
-    if (c->curMillis - preMillis > c->interval) {
-      c->x = c->x - 1;
-      preMillis = c->curMillis;
-    }
+    c->x = c->x - 2;
   } else if (d->pressed(DOWN_BUTTON) && (!phy.collide(dim, BOTTOM_EDGE))) {
-    c->curMillis = millis();
-    if (c->curMillis - preMillis > c->interval) {
-      preMillis = c->curMillis;
-      c->x = c->x + 1;
-    }
+    c->x = c->x + 2;
   } else if (d->pressed(LEFT_BUTTON) && (!phy.collide(dim, LEFT_EDGE))) {
-    c->curMillis = millis();
-    if (c->curMillis - preMillis > c->interval) {
-      preMillis = c->curMillis;
-      c->y = c->y - 1;
-    }
+    c->y = c->y - 2;
   } else if (d->pressed(RIGHT_BUTTON) && (!phy.collide(dim, RIGHT_EDGE))) {
-    c->curMillis = millis();
-    if (c->curMillis - preMillis > c->interval) {
-      preMillis = c->curMillis;
-      c->y = c->y + 1;
-    }
+    c->y = c->y + 2;
   }
 }
 
-void Character::activateWeapons(Weapons *w, Arduboy *d, const unsigned char a[]) {
-  
-  Point dim{w->y,w->x}; 
+void Character::activateWeapons(Arduboy *d, const unsigned char b[]) {
+  wep.countFrames++;
+  Point dim{wep.y, wep.x};
 
-  if (w->shootBullet) {
-    d->drawPixel(w->y, w->x, WHITE);
-    w->ammoCurMillis = millis();
-    if (w->ammoCurMillis - w->ammoPreMillis > w->ammoInterval) {
-      w->ammoPreMillis = w->ammoCurMillis;
-      if (phy.collide(dim, TOP_EDGE)) {
-        w->x = 0;
-        w->shootBullet = 0;
-        w->shooting = 0;
-      } else {
-        w->x = w->x - 1;
-        w->shooting = 1;
-       // d->drawPixel(w->y, w->x, WHITE);
-      }
+  if (wep.shootBullet) {
+    d->drawPixel(wep.y, wep.x, WHITE);
+
+    if (phy.collide(dim, TOP_EDGE)) {
+      wep.x = 0;
+      wep.shootBullet = 0;
+
+    } else {
+
+      wep.x = wep.x - 2;
+    }
+  } else if (wep.shootBomb) {
+    d->drawBitmap(wep.y, wep.x, b, 8, 8, WHITE);
+
+    if (phy.collide(dim, TOP_EDGE)) {
+      wep.x = 0;
+      wep.shootBomb = 0;
+
+    } else {
+      wep.x = wep.x - 2;
     }
   }
-  if (w->shootBomb) {
-    d->drawBitmap(w->y, w->x, a, 8, 8, WHITE);
-    w->ammoCurMillis = millis();
-    if (w->ammoCurMillis - w->ammoPreMillis > w->ammoInterval) {
-      w->ammoPreMillis = w->ammoCurMillis;
-      if (phy.collide(dim, TOP_EDGE)) {
-        w->x = 0;
-        w->shootBomb = 0;
-        w->shooting = 0;
-      } else {
-        w->x = w->x - 1;
-        w->shooting = 1;
-      }
-    }
-  }
-  
-  if (d->pressed(A_BUTTON) && !w->shooting) {
-    w->pressCurMillis = millis();
-    if (w->pressCurMillis - w->pressPreMillis > w->pressInterval) {
-      w->pressPreMillis = w->pressCurMillis;
-      w->x = x + 4;
-      w->y = y + 4;
-      w->shootBullet = 1;
-    }
-  }
-    if (d->pressed(B_BUTTON) && !w->shooting) {
-    w->pressCurMillis = millis();
-    if (w->pressCurMillis - w->pressPreMillis > w->pressInterval) {
-      w->pressPreMillis = w->pressCurMillis;
-      w->x = x;
-      w->y = y;
-      w->shootBomb = 1;
-    }
+
+  if (d->pressed(A_BUTTON) && wep.countFrames > 30  && !d->pressed(B_BUTTON)) {
+    wep.x = x + 4;
+    wep.y = y + 4;
+    wep.shootBullet = 1;
+    wep.countFrames = 0;
+
+  } else if (d->pressed(B_BUTTON) && wep.countFrames > 30  && !d->pressed(A_BUTTON)) {
+    wep.x = x ;
+    wep.y = y ;
+    wep.shootBomb = 1;
+    wep.countFrames = 0;
   }
 }
 
-void Character::addAi(Weapons *w, Character *c, Arduboy *d, const unsigned char a[], bool *boolGS) {
+void Character::addAi( Character *c, Arduboy *d, const unsigned char g[], bool *boolGS) {
 
-Rect mainC = {c->y, c->x, c->h, c->w};
-Rect bel = {w->y, w->x, 1, 1};
-Rect ai = {y,x,8,8};
+  Rect mainC = {c->y, c->x, c->h, c->w};
+  Rect bel = {c->wep.y, c->wep.x, 1, 1};
+  Rect ai = {y, x, h, w};
 
-  if(lifeState){
-    d->drawBitmap(y, x, a, 8, 8, WHITE);
-        curM = millis();
-    if (curM - preM > interval) {
-      preM = curM;
-      if(x < 2 || x > 55){
-        moveState = !moveState;
-      }
-      if(moveState){
-        x = x + 1;
-      }else{
-        x = x - 1;
-      }
+  if (lifeState) {
+    d->drawBitmap(y, x, g, 8, 8, WHITE);
+    if (x < 2 || x > 55) {
+      moveState = !moveState;
+    }
+    if (moveState) {
+      x = x + 1;
+    } else {
+      x = x - 1;
     }
   }
-  
-  if(phy.collide(ai, bel)){
+  if (phy.collide(ai, bel)) {
     lifeState = 0;
+    y = 66;
+    c->killCount = c->killCount + 1;
   }
-    if(phy.collide(ai, mainC)){
+  if (phy.collide(ai, mainC)) {
     *boolGS = 0;
   }
 }
 
+void Character::aiAttackFormation(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS) {
+  wep.countFrames++;
+  Rect mainC = {c->y, c->x, c->h, c->w};
+  Rect bel = {c->wep.y, c->wep.x, 1, 1};
+  Rect ai = {x, y, h, w};
+
+  if (randState) {
+    randO = getrand(MIN, MAX);
+    randState = 0;
+  }
+
+  if (lifeState) {
+    d->drawBitmap(x, y, s , w, h, WHITE);
+
+    if (d->everyXFrames(2)) {
+      if (sinX <= 3.1) {
+        sinX += 0.05;
+        sinY = sin(sinX);
+        x =  (int)(sinX * 41);
+        y =  (int)(sinY * randO);
+      }
+    }
+  }
+
+  if (phy.collide(ai, bel)) {
+    lifeState = 0;
+    y = 66;
+    c->killCount = c->killCount + 1;
+  }
+  if (phy.collide(ai, mainC)) {
+    *boolGS = 0;
+  }
+  if (wep.countFrames > 200) {
+    wep.countFrames = 0;
+    sinX = 0;
+    randState = 1;
+        lifeState = 1;
+  }
+}
+int Character::getrand(int min, int max) {
+  return (rand() % (max - min) + min);
+}
 
