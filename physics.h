@@ -33,7 +33,5 @@ class Physics
   public:
     bool static collide(Point point, Rect rect);
     bool static collide(Rect rect, Rect rect2);
-    //Point bgStars[16] = {{0,-6} , {8,-47} , {16,0} , {32,0} , {40,0} , {48,0} , {56,0} , {64,0} , {72,0} , {80,0} , {88,0} , {96,0} , {104,0} , {112,0} , {120,0} , {128,0}};
-
 };
 #endif

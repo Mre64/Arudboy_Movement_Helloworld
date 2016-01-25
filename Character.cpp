@@ -8,8 +8,6 @@ Character::Character(Rect r) {
   y = r.y;
   h = r.height;
   w = r.width;
-  wep.x = r.x + 4;
-  wep.y = r.y + 4;
 }
 
 
@@ -57,13 +55,13 @@ void Character::activateWeapons(Arduboy *d, const unsigned char b[]) {
     }
   }
 
-  if (d->pressed(A_BUTTON) && wep.countFrames > 30  && !d->pressed(B_BUTTON)) {
+  if (d->pressed(A_BUTTON) && wep.countFrames > 20  && !d->pressed(B_BUTTON)) {
     wep.x = x + 4;
     wep.y = y + 4;
     wep.shootBullet = 1;
     wep.countFrames = 0;
 
-  } else if (d->pressed(B_BUTTON) && wep.countFrames > 30  && !d->pressed(A_BUTTON)) {
+  } else if (d->pressed(B_BUTTON) && wep.countFrames > 20  && !d->pressed(A_BUTTON)) {
     wep.x = x ;
     wep.y = y ;
     wep.shootBomb = 1;

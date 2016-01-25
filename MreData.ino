@@ -5,6 +5,7 @@
 #include "Character.h"
 #include "Weapons.h"
 #include "physics.h"
+#include "Starz.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -20,6 +21,8 @@ Character starLord4(Rect{5, 96, 8, 8});
 Character starLord5( Rect{5, 120, 8, 8});
 
 Weapons weapon;
+//Physics phy;
+Starz starz;
 
 void setup() {
   SPI.begin();
@@ -41,8 +44,10 @@ void loop() {
   if (gameState) {
     // count frames
     weapon.countFrames++;
-    // disply kill count
-    debug(belknar.killCount);
+    //active background starz
+    starz.activate(&display);
+    // disply kill count  
+    killCountDisplay(belknar.killCount);
     // enable directions to be implemented
     belknar.enableMovement(&belknar, &display, ship);
     // enable weapon system (at least A BUTTON for now)
@@ -67,9 +72,22 @@ void loop() {
     if (weapon.countFrames > 125) {
       starLord5.aiAttackFormation(&belknar, &display, star, &gameState);
     }
+//
+//    for (int i = 0; i < 16; i++) {
+//      display.drawPixel(phy.bgStars[i].x, phy.bgStars[i].y, WHITE);
+//      if (phy.bgStars[i].y > 64) {
+//        phy.bgStars[i].y = 0;
+//      }
+//      if (display.everyXFrames(5)) {
+//        phy.bgStars[i].y++;
+//      }
+//    }
+
+
+
 
     // another type of attack
-   // starLord6.addAi( &belknar, &display, star, &gameState);
+    // starLord6.addAi( &belknar, &display, star, &gameState);
     display.display();
 
     display.clearDisplay();
@@ -96,27 +114,13 @@ void introFade() {
   delay(1000);
   display.clearDisplay();
 }
-//
-//void debug(unsigned long x, uint8_t y, uint8_t z, uint8_t j) {
-//  display.setCursor(5, 5);
-//  display.write('y');
-//  display.setCursor(15, 5);
-//  display.print(x);
-//  display.setCursor(5, 15);
-//  display.write('x');
-//  display.setCursor(15, 15);
-//  display.print(y);
-//  display.setCursor(5, 25);
-//  display.write('z');
-//  display.setCursor(15, 25);
-//  display.print(z);
-//  display.setCursor(5, 35);
-//  display.write('j');
-//  display.setCursor(15, 35);
-//  display.print(j);
-//}
-void debug(uint8_t x) {
+
+void killCountDisplay(uint8_t x) {
   display.setCursor(64, 5);
+  display.print(x);
+}
+void killCountDisplayGM(uint8_t x) {
+  display.setCursor(58, 50);
   display.print(x);
 }
 
@@ -139,7 +143,9 @@ void gameOver() {
   display.write('E');
   display.setCursor(115, 22);
   display.write('R');
+  killCountDisplayGM(belknar.killCount);
   display.display();
+
 }
 
 
