@@ -1,13 +1,15 @@
 #include "Arduboy.h"
 #include "physics.h"
 #include "Weapons.h"
-#include <math.h>
+#include "Enemies.h"
+#include "bitmaps.h"
+
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
 #define MIN 25
 #define MAX 65
-#define M_PI 3.14159
+
 
 class Character {
   public:
@@ -15,8 +17,10 @@ class Character {
     void enableMovement(Character *c, Arduboy *d, const unsigned char a[]);
     void activateWeapons(Arduboy *d, const unsigned char b[]);
     void addAi( Character *c, Arduboy *d, const unsigned char g[], bool *boolGS);
-    void aiAttackFormation(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS);
-
+    void aiAttackFormationSin(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS);
+    void aiAttackFormationNegSin(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS);
+    void aiAttackFormationCos(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS);
+    void aiAttackFormationNegCos(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS);
     char characterClass;
     uint8_t strength;
     bool  destructable;
@@ -28,19 +32,19 @@ class Character {
     bool moveState = 1;
     uint8_t killCount;
     float sinX = 0;
+    float sinXBackwards = 3.1;
+    float cosX = 0;
+    float cosXBackwards = 3.1;
+    float cosY;
     float sinY;
-    Weapons wep;  
+    Weapons wep;
     uint8_t randO = 0;
     bool randState = 1;
+    int getrand(int min, int max);
   private:
 
-  int getrand(int min, int max);
 
     Point dim;
     Physics phy;
-
-//    float sinX = -3.14159;
-//    float sinY;
-
 };
 #endif

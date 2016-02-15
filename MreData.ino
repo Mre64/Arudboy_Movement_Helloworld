@@ -4,25 +4,18 @@
 #include "bitmaps.h"
 #include "Character.h"
 #include "Weapons.h"
-#include "physics.h"
 #include "Starz.h"
-#include <stdio.h>
-#include <math.h>
+#include "Enemies.h"
 
 bool gameState = 1;
+uint8_t i = 0;
+
 
 Arduboy display;
-Character belknar( Rect{32, 64 , 8, 8});
-Character starLord( Rect{5, 0, 8, 8});
-Character starLord1( Rect{5, 24, 8, 8});
-Character starLord2( Rect{5, 48, 8, 8});
-Character starLord3( Rect{5, 72, 8, 8});
-Character starLord4(Rect{5, 96, 8, 8});
-Character starLord5( Rect{5, 120, 8, 8});
-
 Weapons weapon;
-//Physics phy;
+Enemies enemy;
 Starz starz;
+Character belknar( Rect{32, 64 , 8, 8});
 
 void setup() {
   SPI.begin();
@@ -46,57 +39,25 @@ void loop() {
     weapon.countFrames++;
     //active background starz
     starz.activate(&display);
-    // disply kill count  
-    killCountDisplay(belknar.killCount);
+    // disply kill count
+    killCountDisplay (belknar.killCount);
     // enable directions to be implemented
     belknar.enableMovement(&belknar, &display, ship);
     // enable weapon system (at least A BUTTON for now)
     belknar.activateWeapons( &display, bomb);
+    // initalize attack phases
+    enemy.initEnemies(&enemy.level, &weapon, &enemy, i, &belknar, &display, star, &gameState);
 
-    // ATTACK phase
-    if (weapon.countFrames > 2) {
-      starLord1.aiAttackFormation(&belknar, &display, star, &gameState);
-    }
-    if (weapon.countFrames > 25) {
-      starLord2.aiAttackFormation(&belknar, &display, star, &gameState);
-    }
-    if (weapon.countFrames > 50) {
-      starLord3.aiAttackFormation(&belknar, &display, star, &gameState);
-    }
-    if (weapon.countFrames > 75) {
-      starLord4.aiAttackFormation(&belknar, &display, star, &gameState);
-    }
-    if (weapon.countFrames > 100) {
-      starLord.aiAttackFormation(&belknar, &display, star, &gameState);
-    }
-    if (weapon.countFrames > 125) {
-      starLord5.aiAttackFormation(&belknar, &display, star, &gameState);
-    }
-//
-//    for (int i = 0; i < 16; i++) {
-//      display.drawPixel(phy.bgStars[i].x, phy.bgStars[i].y, WHITE);
-//      if (phy.bgStars[i].y > 64) {
-//        phy.bgStars[i].y = 0;
-//      }
-//      if (display.everyXFrames(5)) {
-//        phy.bgStars[i].y++;
-//      }
-//    }
-
-
-
-
-    // another type of attack
-    // starLord6.addAi( &belknar, &display, star, &gameState);
     display.display();
-
     display.clearDisplay();
 
   } else {
     gameOver();
   }
+  if (!display.tunes.playing()) {
+    //display.tunes.playScore(score);
+  }
 }
-
 //isimple intro bitmap with fade effect
 void introFade() {
   display.clearDisplay();
@@ -115,7 +76,7 @@ void introFade() {
   display.clearDisplay();
 }
 
-void killCountDisplay(uint8_t x) {
+void killCountDisplay(unsigned short x) {
   display.setCursor(64, 5);
   display.print(x);
 }
@@ -125,6 +86,7 @@ void killCountDisplayGM(uint8_t x) {
 }
 
 void gameOver() {
+  display.tunes.stopScore();
   display.clearDisplay();
   display.setTextSize(2);
   display.setCursor(0, 22);
@@ -145,7 +107,6 @@ void gameOver() {
   display.write('R');
   killCountDisplayGM(belknar.killCount);
   display.display();
-
 }
 
 

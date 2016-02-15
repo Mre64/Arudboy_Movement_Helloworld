@@ -1,6 +1,4 @@
 #include "Character.h"
-#include <stdio.h>
-#include <math.h>
 
 Character::Character(Rect r) {
 
@@ -55,13 +53,14 @@ void Character::activateWeapons(Arduboy *d, const unsigned char b[]) {
     }
   }
 
-  if (d->pressed(A_BUTTON) && wep.countFrames > 20  && !d->pressed(B_BUTTON)) {
+  if (d->pressed(A_BUTTON) && wep.countFrames > 30  && !d->pressed(B_BUTTON)) {
     wep.x = x + 4;
     wep.y = y + 4;
     wep.shootBullet = 1;
     wep.countFrames = 0;
+    d->tunes.playScore(laser);
 
-  } else if (d->pressed(B_BUTTON) && wep.countFrames > 20  && !d->pressed(A_BUTTON)) {
+  } else if (d->pressed(B_BUTTON) && wep.countFrames > 30  && !d->pressed(A_BUTTON)) {
     wep.x = x ;
     wep.y = y ;
     wep.shootBomb = 1;
@@ -96,7 +95,7 @@ void Character::addAi( Character *c, Arduboy *d, const unsigned char g[], bool *
   }
 }
 
-void Character::aiAttackFormation(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS) {
+void Character::aiAttackFormationSin(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS) {
   wep.countFrames++;
   Rect mainC = {c->y, c->x, c->h, c->w};
   Rect bel = {c->wep.y, c->wep.x, 1, 1};
@@ -119,20 +118,133 @@ void Character::aiAttackFormation(Character *c, Arduboy *d, const unsigned char 
       }
     }
   }
-
   if (phy.collide(ai, bel)) {
     lifeState = 0;
-    y = 66;
+    y = 166;
     c->killCount = c->killCount + 1;
   }
   if (phy.collide(ai, mainC)) {
     *boolGS = 0;
   }
-  if (wep.countFrames > 200) {
+  if (wep.countFrames > 250) {
     wep.countFrames = 0;
     sinX = 0;
     randState = 1;
-        lifeState = 1;
+    lifeState = 1;
+  }
+}
+void Character::aiAttackFormationNegSin(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS) {
+  wep.countFrames++;
+  Rect mainC = {c->y, c->x, c->h, c->w};
+  Rect bel = {c->wep.y, c->wep.x, 1, 1};
+  Rect ai = {x, y, h, w};
+
+  if (randState) {
+    randO = getrand(MIN, MAX);
+    randState = 0;
+  }
+
+  if (lifeState) {
+    d->drawBitmap(x, y, s , w, h, WHITE);
+
+    if (d->everyXFrames(2)) {
+      if (sinXBackwards >= 0) {
+        sinXBackwards -= 0.05;
+        sinY = sin(sinXBackwards);
+        x =  (int)(sinXBackwards * 41);
+        y =  (int)(sinY * randO);
+      }
+    }
+  }
+  if (phy.collide(ai, bel)) {
+    lifeState = 0;
+    y = 166;
+    c->killCount = c->killCount + 1;
+  }
+  if (phy.collide(ai, mainC)) {
+    *boolGS = 0;
+  }
+  if (wep.countFrames > 250) {
+    wep.countFrames = 0;
+    sinXBackwards = 3.1;
+    randState = 1;
+    lifeState = 1;
+  }
+}
+void Character::aiAttackFormationCos(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS) {
+  wep.countFrames++;
+  Rect mainC = {c->y, c->x, c->h, c->w};
+  Rect bel = {c->wep.y, c->wep.x, 1, 1};
+  Rect ai = {x, y, h, w};
+
+  if (randState) {
+    randO = getrand(MIN, MAX);
+    randState = 0;
+  }
+
+  if (lifeState) {
+    d->drawBitmap(x, y, s , w, h, WHITE);
+
+    if (d->everyXFrames(2)) {
+      if (sinX <= 3.1) {
+        sinX += 0.05;
+        sinY = cos(sinX);
+        x =  (int)(sinX * 41);
+        y =  (int)(sinY * randO);
+      }
+    }
+  }
+  if (phy.collide(ai, bel)) {
+    lifeState = 0;
+    y = 166;
+    c->killCount = c->killCount + 1;
+  }
+  if (phy.collide(ai, mainC)) {
+    *boolGS = 0;
+  }
+  if (wep.countFrames > 250) {
+    wep.countFrames = 0;
+    sinX = 0;
+    randState = 1;
+    lifeState = 1;
+  }
+}
+void Character::aiAttackFormationNegCos(Character *c, Arduboy *d, const unsigned char s[], bool *boolGS) {
+  wep.countFrames++;
+  Rect mainC = {c->y, c->x, c->h, c->w};
+  Rect bel = {c->wep.y, c->wep.x, 1, 1};
+  Rect ai = {x, y, h, w};
+
+  if (randState) {
+    randO = getrand(MIN, MAX);
+    randState = 0;
+  }
+
+  if (lifeState) {
+    d->drawBitmap(x, y, s , w, h, WHITE);
+
+    if (d->everyXFrames(2)) {
+      if (sinXBackwards >= 0) {
+        sinXBackwards -= 0.05;
+        sinY = cos(sinXBackwards);
+        x =  (int)(sinXBackwards * 41);
+        y =  (int)(sinY * randO);
+      }
+    }
+  }
+  if (phy.collide(ai, bel)) {
+    lifeState = 0;
+    y = 166;
+    c->killCount = c->killCount + 1;
+  }
+  if (phy.collide(ai, mainC)) {
+    *boolGS = 0;
+  }
+  if (wep.countFrames > 250) {
+    wep.countFrames = 0;
+    sinXBackwards = 3.1;
+    randState = 1;
+    lifeState = 1;
   }
 }
 int Character::getrand(int min, int max) {

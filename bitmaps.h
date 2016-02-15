@@ -9,6 +9,7 @@ extern const unsigned char star[];
 extern const unsigned char ship[];
 extern const unsigned char mreData[];
 extern const unsigned char bomb [];
+extern const unsigned char laser [];
 extern const byte score [];
 extern const unsigned char sajaxAlta [];
 
